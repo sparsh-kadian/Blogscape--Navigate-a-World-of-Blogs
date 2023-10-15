@@ -1,6 +1,7 @@
 import { createContext, useState } from "react";
 import { baseUrl } from "../baseUrl";
 import { defaults } from "autoprefixer";
+import {  useNavigate } from "react-router-dom";
 
 //  Step - 1
 export const AppContext = createContext();
@@ -10,12 +11,18 @@ export default function AppContextProvider({children}) {
     const [posts, setPosts] = useState("");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(null);
+    const navigate = useNavigate(); 
 
-    // Data filling pending
-
-    async function fetchBlogPosts(page = 1) {
+    const fetchBlogPosts = async(page = 1, tag=null, category) => {
         setLoading(true);
-        const url = `${baseUrl}?page=${page}`;     // Yha hume 2 chizo ki need thi toh humne baseUrl ke sath page ka data bhi add krdia 
+        let url = `${baseUrl}?page=${page}`;
+        if(tag) {
+            url += `&tag=${tag}`;
+        }
+        if(category) {
+            url += `&category=${category}`;
+        }
+        // const url = `${baseUrl}?page=${page}`;     // Yha hume 2 chizo ki need thi toh humne baseUrl ke sath page ka data bhi add krdia 
         try{
             const result = await fetch(url);       // Sbse pehle humne API fetch krli, or result me store krlia usse
             const data = await result.json();      // Ab humne result ko json format me convert krlia   
@@ -34,6 +41,7 @@ export default function AppContextProvider({children}) {
     }
 
     function handlePageChange(page) {
+        navigate({ search: `?page=${page}`});
         setPage(page);              // Phle page no. set krdo 
         fetchBlogPosts(page);       // Fir us page ke according API call mardo 
     }
